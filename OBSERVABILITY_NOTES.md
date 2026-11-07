@@ -57,5 +57,4 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
 ### 2. Backend Log Kanıtı
 * **Konteyner:** `opentelemetry-demo-checkoutservice-1`
 * **Log Çıktısı:**
-```text
-2026-11-07 11:14:38.184 INFO [CheckoutService] Order successfully created with ID: 6e20dde7-4f94-4939-a9ed-2aecbd2c2b26
+![Log Çıktısı](evidence/backend-log-evidence.png)

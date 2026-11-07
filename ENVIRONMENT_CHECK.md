@@ -31,7 +31,7 @@ docker compose --env-file .env.override -f compose.yaml -f compose.full.yaml -f 
 
 ### Konfigürasyon Kontrol Notları:
 1. **UI & Checkout Verification:** Astronomy Shop anasayfası açıldı, sepete ürün ekleme ve checkout adımlarının ilk arayüz kontrolleri yapıldı.
-2. **Playwright Automation Check:** Test runner lokal ortamda ilklendirildi ve temel navigasyon doğrulandı.
+2. **Playwright Automation Check:** Bağımsız test projesi (E2E Test Suite) başlatıldı; Playwright runner lokal ortamda yapılandırılarak Docker üzerinde koşan Astronomy Shop (http://localhost:8080) uygulamasına başarıyla erişti ve temel navigasyon doğrulandı.
 3. **Observability Sanity Check:** Jaeger arayüzünde `frontend` ve `checkoutservice` izlerinin (traces) oluştuğu gözlemlendi.
 
 ---
