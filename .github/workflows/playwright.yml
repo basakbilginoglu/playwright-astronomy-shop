@@ -1,27 +1,110 @@
 name: Playwright Tests
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+env:
+  CI: true
+  BASE_URL: http://localhost:8080
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      # Playwright test projesi
+      - name: Checkout Playwright project
+        uses: actions/checkout@v4
+
+      # Test edilen uygulamanın sabitlenmiş sürümü
+      - name: Checkout OpenTelemetry Demo
+        uses: actions/checkout@v4
+        with:
+          repository: open-telemetry/opentelemetry-demo
+          ref: 0aeadb11cf3ecaac318bacd1986f23eff531c8f5
+          path: opentelemetry-demo
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Astronomy Shop uygulamasını ve gerekli bağımlılıklarını başlat
+      - name: Start Astronomy Shop
+        run: |
+          docker compose \
+            --project-directory opentelemetry-demo \
+            --env-file opentelemetry-demo/.env \
+            --env-file opentelemetry-demo/.env.override \
+            -f opentelemetry-demo/compose.yaml \
+            -f docker/compose.ci.yaml \
+            up -d --build --wait --wait-timeout 300 frontend
+
+          curl --fail --silent --show-error \
+            --retry 30 \
+            --retry-delay 5 \
+            --retry-connrefused \
+            --max-time 10 \
+            http://localhost:8080/ \
+            -o /dev/null
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      # Hata durumunda Docker servislerinin loglarını sakla
+      - name: Collect Docker logs
+        if: failure()
+        run: |
+          docker compose \
+            --project-directory opentelemetry-demo \
+            --env-file opentelemetry-demo/.env \
+            --env-file opentelemetry-demo/.env.override \
+            -f opentelemetry-demo/compose.yaml \
+            -f docker/compose.ci.yaml \
+            ps || true
+
+          docker compose \
+            --project-directory opentelemetry-demo \
+            --env-file opentelemetry-demo/.env \
+            --env-file opentelemetry-demo/.env.override \
+            -f opentelemetry-demo/compose.yaml \
+            -f docker/compose.ci.yaml \
+            logs --no-color --tail=100 || true
+
+      # HTML raporu ve hata kanıtları
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      # CI bitince servisleri kapat
+      - name: Stop Astronomy Shop
+        if: always()
+        run: |
+          docker compose \
+            --project-directory opentelemetry-demo \
+            --env-file opentelemetry-demo/.env \
+            --env-file opentelemetry-demo/.env.override \
+            -f opentelemetry-demo/compose.yaml \
+            -f docker/compose.ci.yaml \
+            down -v --remove-orphans

@@ -14,10 +14,10 @@
 
 | Servis / Arayüz | Beklenen URL / Port | Durum (Status) | Erişilebilirlik Kanıtı (Screenshot / Log) |
 | :--- | :--- | :--- | :--- |
-| **Web Store (UI)** | `http://localhost:8080/` |  Erişilebilir (HTTP 200) | `evidence/env_webstore_check.png` |
-| **Jaeger UI (Trace)** | `http://localhost:8080/jaeger/ui/` |  Erişilebilir (HTTP 200) | `evidence/env_jaeger_check.png` |
-| **Grafana (Metrics/Logs)** | `http://localhost:8080/grafana/` |  Erişilebilir (HTTP 200) | `evidence/env_grafana_check.png` |
-| **Feature Flags UI** | `http://localhost:8080/feature` |  Erişilebilir (HTTP 200) | `evidence/env_featureflags_check.png` |
+| **Web Store (UI)** | `http://localhost:8080/` |  Erişilebilir (HTTP 200) | `evidence/environment-check/open-telemetry-demo.png` |
+| **Jaeger UI (Trace)** | `http://localhost:8080/jaeger/ui/` |  Erişilebilir (HTTP 200) | `evidence/environment-check/jaeger-ui.png` |
+| **Grafana (Metrics/Logs)** | `http://localhost:8080/grafana/` |  Erişilebilir (HTTP 200) | `evidence/environment-checkgrafana_dashboard.png` |
+| **Feature Flags UI** | `http://localhost:8080/feature` |  Erişilebilir (HTTP 200) | `evidence/environment-check/featureflags_check.png` |
 
 ---
 
