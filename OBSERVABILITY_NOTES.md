@@ -25,8 +25,9 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
 
 1. **İlgili Log Örneği:**
    * `checkout` mikroservisinden alınan başarı kaydı:
-     ```text
-     [CheckoutService] Order successfully created with ID: 6e20dde7-4f94-4939-a9ed-2aecbd2c2b26
+     ```panic: runtime error: invalid memory address or nil pointer dereference [signal SIGSEGV: segmentation violation]
+    main.(*checkout).PlaceOrder (...)
+    /usr/src/app/main.go:420 +0x17b8
      ```
 2. **Servis ve Olay Detayı:** `checkoutservice` konteynerinden gelmektedir ve siparişin işlenip veritabanına kaydedildiğini anlatır.
 3. **Sağladığı Ek Bilgi:** UI testi sadece ekrandaki mesajı görürken, bu log arka plandaki benzersiz `order-id` / `session-id` bilgisini sağlar.
