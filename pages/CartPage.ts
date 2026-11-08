@@ -67,4 +67,7 @@ export class CartPage {
       (el) => (el as HTMLInputElement).validity.valueMissing
     );
   }
+  async clearZipCode(): Promise<void> {
+  await this.zipInput.fill('');
+}
 }

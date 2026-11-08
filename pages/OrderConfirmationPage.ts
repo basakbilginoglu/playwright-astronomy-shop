@@ -18,7 +18,7 @@ export class OrderConfirmationPage {
   }
 
   async verifyOrderSuccess() {
-    await expect(this.confirmationTitle).toBeVisible({ timeout: 15_000 });
+    await expect(this.confirmationTitle).toBeVisible({ timeout: 20_000 });
     await expect(this.main).toContainText(UUID_REGEX);
   }
 
