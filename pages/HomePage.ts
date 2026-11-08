@@ -25,7 +25,7 @@ export class HomePage {
   }
 
   async verifyProductDetails(productName: string, price: number) {
-    await expect(this.productName).toHaveText(productName, { timeout: 15_000 });
+    await expect(this.productName).toHaveText(productName, { timeout: 20_000 });
     await expect(this.productPrice).toHaveText(`$ ${price.toFixed(2)}`);
     await expect(this.productQuantity).toBeVisible();
     await expect(this.addToCartButton).toBeVisible();

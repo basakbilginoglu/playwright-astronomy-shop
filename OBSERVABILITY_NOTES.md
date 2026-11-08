@@ -24,14 +24,28 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
 ## C2 — Log İncelemesi
 
 1. **İlgili Log Örneği:**
-   * `checkout` mikroservisinden alınan başarı kaydı:
-     ```panic: runtime error: invalid memory address or nil pointer dereference [signal SIGSEGV: segmentation violation]
-    main.(*checkout).PlaceOrder (...)
-    /usr/src/app/main.go:420 +0x17b8
-     ```
-2. **Servis ve Olay Detayı:** `checkoutservice` konteynerinden gelmektedir ve siparişin işlenip veritabanına kaydedildiğini anlatır.
-3. **Sağladığı Ek Bilgi:** UI testi sadece ekrandaki mesajı görürken, bu log arka plandaki benzersiz `order-id` / `session-id` bilgisini sağlar.
-4. **Kanıt Durumu:** Sistem içi iş kuralının tamamlandığını kanıtlar; ancak dış banka/kargo 3. parti entegrasyon teyidini tek başına kanıtlamaz.
+
+   `checkout` mikroservisinden alınan başarılı sipariş ve HTTP yanıtı kayıtları:
+
+   ```json
+   {"level":30, "time":1794133325900, "demo.order.id":"3f209ae5-db5e-11f1-85ed-72eafc9581b5", "msg":"Order placed successfully"}
+   {"level":30, "time":1794133325901, "http.request.method":"POST", "url.path":"/api/checkout", "http.response.status_code":200, "msg":"API request completed"}
+
+2. **Servis ve Olay Detayı:**
+
+   Kayıtlar, checkout işlemi sırasında siparişin başarıyla oluşturulduğunu ve `/api/checkout` endpoint'ine yapılan POST isteğinin HTTP 200 yanıtıyla tamamlandığını göstermektedir.
+
+3. **Sağladığı Ek Bilgi:**
+
+   UI testi yalnızca kullanıcıya gösterilen sipariş onay mesajını doğrularken, backend logu siparişe ait benzersiz `order-id` bilgisini sağlar:
+
+   `3f209ae5-db5e-11f1-85ed-72eafc9581b5`
+
+   Bu bilgi, siparişin backend tarafındaki kaydının izlenmesine yardımcı olur.
+
+4. **Kanıt Durumu:**
+
+   Loglar, sipariş oluşturma işleminin başarılı olarak raporlandığını ve HTTP isteğinin 200 OK yanıtıyla tamamlandığını kanıtlamaktadır. Ancak bu kayıtlar tek başına siparişin kalıcı veritabanına yazıldığını veya sonraki tüm iş adımlarının tamamlandığını kanıtlamaz.
 
 ---
 
@@ -56,6 +70,6 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
 ---
 
 ### 2. Backend Log Kanıtı
-* **Konteyner:** `opentelemetry-demo-checkoutservice-1`
+* **Konteyner:** `opentelemetry-demo-checkout`
 * **Log Çıktısı:**
-![Log Çıktısı](evidence/backend-log-evidence.png)
+![Log Çıktısı](evidence/backend-log-succesful.png)
