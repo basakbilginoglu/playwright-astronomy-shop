@@ -24,16 +24,6 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
 ## C2 — Log İncelemesi
 
 1. **İlgili Log Örneği:**
-
-   `checkout` mikroservisinden alınan başarılı sipariş ve HTTP yanıtı kayıtları:
-
-   ```json
-   {"level":30, "time":1794133325900, "demo.order.id":"3f209ae5-db5e-11f1-85ed-72eafc9581b5", "msg":"Order placed successfully"}
-   {"level":30, "time":1794133325901, "http.request.method":"POST", "url.path":"/api/checkout", "http.response.status_code":200, "msg":"API request completed"}
-
-## C2 — Log İncelemesi
-
-1. **İlgili Log Örneği:**
    * `checkout` mikroservisinden/Next.js uygulamasından alınan başarılı sipariş kayıt ve HTTP yanıtı çıktıları:
      ```json
      {"level":30, "time":1794133325900, "demo.order.id":"3f209ae5-db5e-11f1-85ed-72eafc9581b5", "msg":"Order placed successfully"}
@@ -45,19 +35,78 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
 
 ---
 
-## C3 — Metric İncelemesi (Grafana)
+### C3 — Grafana / Prometheus Metrik İncelemesi
 
-1. **Seçilen Metrik ve Grafana Görünümü:**
-   * **Metrik Adı:** `http_server_duration_milliseconds` (veya `rpc_server_duration_milliseconds` / gRPC istek süreleri)
-   * **Grafana Paneli:** OpenTelemetry Demo ile birlikte gelen standart **"Service Performance"** veya **"RED Method"** (Rate, Errors, Duration) panelleri incelenmiştir.
+Bu bölümde, UI-01 başarılı checkout senaryosundan sonra metriklerin Prometheus üzerinden sorgulanıp sorgulanamadığı ve Grafana'da görüntülenip görüntülenemediği incelenmiştir.
 
-2. **Metrik Ne Anlama Geliyor ve QA Sürecinde Neden Kritik?**
-   * Bu metrik, `checkout` servisinin ve alt mikroservislerin gelen isteklere yanıt vermesinin **milisaniye bazında ne kadar sürdüğünü** (latency dağılımını) gösterir. 
-   * QA açısından değeri şudur: Bir Playwright testi arayüzde yeşil yanıp "başarılı" dese bile, arka planda bir servis yavaş çalışıyor (örneğin 500ms yerine 4000ms yanıt veriyorsa) bu durum ilerleyen aşamada **timeout (zaman aşımı)** hatalarına veya kullanıcı kaybına yol açar. Metrikler, bu gizli performans düşüşlerini henüz kullanıcıya yansımadan yakalamamızı sağlar.
+#### 1. Grafana Data Source Kontrolü
 
-3. **Spike (Ani Yük/Tepe Değer) ve Anomali Analizi:**
-   * Grafana panellerinde test sırasında görülen ani gecikme artışları (spike'lar), genellikle Docker konteynerlerinin anlık CPU/RAM kaynak kısıtlamalarından veya Go dilinin Garbage Collection (GC) süreçlerinden kaynaklanır. 
-   * Bu yüzden tek bir yüksek latency değeri doğrudan "Yazılım Hatası (Bug)" olarak etiketlenmez; metrik sürekliliğine (trend line) bakılarak sorunun anlık bir kaynak darboğazından mı yoksa kalıcı bir kod verimsizliğinden mi kaynaklandığı doğrulanır.
+Grafana'da Prometheus data source bağlantısı test edildiğinde aşağıdaki sonuç alınmıştır:
+
+```text
+Successfully queried the Prometheus API.
+```
+
+Bu sonuç, Grafana'nın Prometheus API'sine erişebildiğini göstermektedir. Ancak tek başına Prometheus üzerinde metrik verisi bulunduğunu kanıtlamaz.
+
+#### 2. Prometheus `up` Sorgusu
+
+Önce Prometheus üzerinde aşağıdaki sorgu çalıştırılmıştır:
+
+```promql
+up
+```
+
+Sorgu sonucunda:
+
+```text
+Empty query result
+```
+
+yanıtı alınmıştır.
+
+Aynı sorgu Grafana Explore ekranında da çalıştırılmış ve **No data** sonucu görülmüştür.
+
+Bu nedenle mevcut incelemede `up` metriği üzerinden servislerin scrape durumları doğrulanamamıştır.
+
+#### 3. Prometheus Targets Kontrolü
+
+Prometheus arayüzündeki Targets bölümünde şu mesaj görüntülenmiştir:
+
+```text
+No scrape pools found
+```
+
+Bu sonuç, Prometheus tarafında scrape edilecek hedef havuzlarının bulunmadığını göstermektedir.
+
+Ancak OpenTelemetry Demo ortamında metrikler yalnızca Prometheus'un klasik scrape mekanizmasıyla aktarılmayabilir. Prometheus'un OTLP receiver üzerinden metrik kabul etmesi de mümkündür. Bu nedenle `No scrape pools found` mesajı tek başına metrik aktarımının tamamen çalışmadığını kanıtlamaz.
+
+#### 4. Sonraki Kontrol: Metrik İsimlerini Sorgulama
+
+Prometheus üzerinde yalnızca `up` metriğine bakmak yerine, herhangi bir metrik serisinin bulunup bulunmadığını kontrol etmek için aşağıdaki PromQL sorgusu kullanılmalıdır:
+
+```promql
+count by (__name__) ({__name__=~".+"})
+```
+
+Bu sorgu, Prometheus'ta bulunan metrik isimlerini ve her isim için mevcut seri sayısını listeler.
+
+- Sonuç dönerse Prometheus'ta metrik verisi bulunmaktadır; `up` metriğinin bulunmaması, klasik scrape tabanlı izleme yapılmadığı anlamına gelebilir.
+- Sonuç dönmezse Prometheus'ta sorgulanabilir metrik serisi bulunmadığı anlaşılır. Bu durumda OpenTelemetry Collector ile Prometheus arasındaki metrik aktarımının ayrıca incelenmesi gerekir.
+
+#### 5. Gözlem ve Sonuç
+
+Bu inceleme sırasında:
+
+- Grafana'nın Prometheus API'sine erişebildiği doğrulanmıştır.
+- Prometheus üzerinde `up` sorgusu boş sonuç döndürmüştür.
+- Grafana Explore ekranında `up` sorgusu için **No data** görüntülenmiştir.
+- Prometheus Targets bölümünde **No scrape pools found** mesajı görülmüştür.
+
+Mevcut kanıtlarla checkout işlemi için latency, request rate, error rate veya servis bazında metrik değerleri raporlanamamaktadır. Bu nedenle başarılı checkout senaryosunun metrikler üzerindeki etkisi henüz doğrulanamamıştır.
+
+**QA değerlendirmesi:** Trace ve log incelemesi checkout akışının izlenmesine yardımcı olurken, metrik incelemesi mevcut ortamda tamamlanamamıştır. Metrik verisi elde edilmeden performans veya sistem sağlığı hakkında sayısal bir sonuca varılmamıştır.
+
 
 ---
 

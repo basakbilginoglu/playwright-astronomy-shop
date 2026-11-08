@@ -1,15 +1,24 @@
 {
   "name": "playwright-astronomy-shop",
   "version": "1.0.0",
-  "main": "index.js",
-    "type": "module",
+  "description": "End-to-end testing of OpenTelemetry Astronomy Shop using Playwright and TypeScript.",
+  "type": "module",
   "scripts": {
-      "typecheck": "tsc --noEmit"
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "playwright",
+    "typescript",
+    "qa",
+    "e2e-testing",
+    "observability"
+  ],
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.6",
