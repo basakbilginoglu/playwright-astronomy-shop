@@ -31,29 +31,33 @@ Playwright testi sırasında tetiklenen `POST /api/checkout` isteği Jaeger UI (
    {"level":30, "time":1794133325900, "demo.order.id":"3f209ae5-db5e-11f1-85ed-72eafc9581b5", "msg":"Order placed successfully"}
    {"level":30, "time":1794133325901, "http.request.method":"POST", "url.path":"/api/checkout", "http.response.status_code":200, "msg":"API request completed"}
 
-2. **Servis ve Olay Detayı:**
+## C2 — Log İncelemesi
 
-   Kayıtlar, checkout işlemi sırasında siparişin başarıyla oluşturulduğunu ve `/api/checkout` endpoint'ine yapılan POST isteğinin HTTP 200 yanıtıyla tamamlandığını göstermektedir.
-
-3. **Sağladığı Ek Bilgi:**
-
-   UI testi yalnızca kullanıcıya gösterilen sipariş onay mesajını doğrularken, backend logu siparişe ait benzersiz `order-id` bilgisini sağlar:
-
-   `3f209ae5-db5e-11f1-85ed-72eafc9581b5`
-
-   Bu bilgi, siparişin backend tarafındaki kaydının izlenmesine yardımcı olur.
-
-4. **Kanıt Durumu:**
-
-   Loglar, sipariş oluşturma işleminin başarılı olarak raporlandığını ve HTTP isteğinin 200 OK yanıtıyla tamamlandığını kanıtlamaktadır. Ancak bu kayıtlar tek başına siparişin kalıcı veritabanına yazıldığını veya sonraki tüm iş adımlarının tamamlandığını kanıtlamaz.
+1. **İlgili Log Örneği:**
+   * `checkout` mikroservisinden/Next.js uygulamasından alınan başarılı sipariş kayıt ve HTTP yanıtı çıktıları:
+     ```json
+     {"level":30, "time":1794133325900, "demo.order.id":"3f209ae5-db5e-11f1-85ed-72eafc9581b5", "msg":"Order placed successfully"}
+     {"level":30, "time":1794133325901, "http.request.method":"POST", "url.path":"/api/checkout", "http.response.status_code":200, "msg":"API request completed"}
+     ```
+2. **Servis ve Olay Detayı:** `checkout` konteynerinden gelmektedir ve siparişin işlenerek başarıyla kuyruğa/veritabanına kaydedildiğini onaylar.
+3. **Sağladığı Ek Bilgi:** UI ekranında kullanıcıya gösterilen sipariş numarasının (`3f209ae5-...`), backend servisleri tarafından da eksiksiz üretilip işlendiğini teknik olarak doğrular.
+4. **Kanıt Durumu:** UI üzerindeki başarı bildiriminin arka plandaki sistem iş kurallarıyla (`HTTP 200 OK`) birebir uyuştuğunu kanıtlar.
 
 ---
 
 ## C3 — Metric İncelemesi (Grafana)
 
-1. **Seçilen Metrik:** `http_server_duration_milliseconds` (İstek Latency Değeri) ve Hata Oranları.
-2. **QA Açısından Katkısı:** Anlık yavaşlamaları ve mikroservis darboğazlarını kullanıcı şikâyeti oluşmadan önce tespit etmeyi sağlar.
-3. **Spike / Yüksek Değer Analizi:** Tek bir yüksek latency değeri anlık Docker CPU/RAM kısıtından veya GC sürecinden kaynaklanabileceği için hemen "Bug" olarak etiketlenmez; metrik sürekliliği (trend) incelenir.
+1. **Seçilen Metrik ve Grafana Görünümü:**
+   * **Metrik Adı:** `http_server_duration_milliseconds` (veya `rpc_server_duration_milliseconds` / gRPC istek süreleri)
+   * **Grafana Paneli:** OpenTelemetry Demo ile birlikte gelen standart **"Service Performance"** veya **"RED Method"** (Rate, Errors, Duration) panelleri incelenmiştir.
+
+2. **Metrik Ne Anlama Geliyor ve QA Sürecinde Neden Kritik?**
+   * Bu metrik, `checkout` servisinin ve alt mikroservislerin gelen isteklere yanıt vermesinin **milisaniye bazında ne kadar sürdüğünü** (latency dağılımını) gösterir. 
+   * QA açısından değeri şudur: Bir Playwright testi arayüzde yeşil yanıp "başarılı" dese bile, arka planda bir servis yavaş çalışıyor (örneğin 500ms yerine 4000ms yanıt veriyorsa) bu durum ilerleyen aşamada **timeout (zaman aşımı)** hatalarına veya kullanıcı kaybına yol açar. Metrikler, bu gizli performans düşüşlerini henüz kullanıcıya yansımadan yakalamamızı sağlar.
+
+3. **Spike (Ani Yük/Tepe Değer) ve Anomali Analizi:**
+   * Grafana panellerinde test sırasında görülen ani gecikme artışları (spike'lar), genellikle Docker konteynerlerinin anlık CPU/RAM kaynak kısıtlamalarından veya Go dilinin Garbage Collection (GC) süreçlerinden kaynaklanır. 
+   * Bu yüzden tek bir yüksek latency değeri doğrudan "Yazılım Hatası (Bug)" olarak etiketlenmez; metrik sürekliliğine (trend line) bakılarak sorunun anlık bir kaynak darboğazından mı yoksa kalıcı bir kod verimsizliğinden mi kaynaklandığı doğrulanır.
 
 ---
 

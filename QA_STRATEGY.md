@@ -41,3 +41,21 @@ Tüm kontrolleri ve test senaryolarını yalnızca UI katmanında otomatize etme
 1. **API ve Servis Seviyesi (Ağırlıklı Katman):** İş mantığı (*business logic*), fiyat ve vergi hesaplamaları, ödeme entegrasyonu ve kargo veri doğrulamaları öncelikle API ve mikroservis seviyesindeki otomasyon testleriyle doğrulanmalıdır. Bu katman, hataların geliştirme sürecinde en hızlı, stabil ve düşük maliyetle tespit edilmesini sağlar.
 2. **UI Seviyesi (Kritik Kullanıcı Yolculuğu):** UI otomasyon testleri yalnızca kritik uçtan uca kullanıcı yolculuğunu (*Critical User Journey*) ve arayüz bileşenlerinin görsel/işlevsel doğruluğunu teyit etmek için sınırlı sayıda tutulmalıdır (Örn: En az 1 Başarılı Checkout, 1 Negatif Akış).
 3. **Observability Katmanı (Derinlemesine Doğrulama):** Test sonuçlarının ötesine geçerek olası bir hatanın kök nedenini hızlıca saptamak için Trace (Jaeger), Log ve Metric (Grafana) sinyalleri test sürecine dahil edilmeli; backend servis davranışı sistem izleri üzerinden doğrulanmalıdır.
+
+## B.2 — Negatif Test Senaryoları ve Seçim Gerekçeleri (Negative Testing Strategy)
+
+E-ticaret otomasyon testlerinde sadece "mutlu yol" (happy path) akışını test etmek, sistemin hatalı durumlardaki davranışını doğrulamak için yeterli değildir. Bu doğrultuda, hazırlanan Playwright test suite'i içerisindeki spesifik negatif senaryolar (`UI-02` ve `UI-03`) ve bunların seçilme teknik gerekçeleri aşağıda detaylandırılmıştır:
+
+### 1. UI-02: Eksik ZIP Kodu (Form Validation & Network Shielding)
+* **Senaryo:** `checkout should be prevented when ZIP code is missing`
+* **Seçim Gerekçesi:**
+  * **Network Katmanını Koruma (Network Shielding):** İstemci (browser) tarafındaki form doğrulamasının (HTML5 browser validation) doğru çalışıp çalışmadığını test eder. Geçersiz veya eksik veri girişinde isteğin henüz tarayıcıdan çıkmadan engellendiğini ve `/api/checkout` API'sine boş yere ağ isteği (network request) atılmadığını (`expect(checkoutRequested).toBe(false)`) kanıtlar.
+  * **Backend Yükünü Engelleme:** Geçersiz verilerin backend servislerine (`checkout` gRPC servisi) kadar ulaşıp sunucu kaynaklarını boşa harcamasını ve veritabanında hatalı/eksik veri oluşmasını önler.
+  * **Kullanıcı Deneyimi (UX):** Kullanıcının sepet sayfasında tutulduğunu ve sipariş onay ekranına (`confirmationTitle`) geçiş yapılmadığını doğrular.
+
+### 2. UI-03: HTTP 400, 500 ve 503 API Hata Mocklama (Graceful Degradation & Error Handling)
+* **Senaryo:** `order should not complete when checkout API returns [400, 500, 503]`
+* **Seçim Gerekçesi:**
+  * **Resilience (Sistem Dayanıklılığı) Kontrolü:** İstemci katmanının (Next.js BFF / Frontend) backend'den gelebilecek istemci hatalarına (`400 Bad Request`), sunucu çökmelerine (`500 Internal Server Error`) ve servis kesintilerine (`503 Service Unavailable`) nasıl tepki verdiğini doğrular.
+  * **Arayüz Uyumsuzluklarını Yakalama:** Sunucu tarafında hata oluştuğunda arayüzün yanlışlıkla "Sipariş Başarılı" ekranı gösterip göstermediğini ve kullanıcının sepet sayfasında (`/cart`) güvenli şekilde tutulup tutulmadığını (`page.toHaveURL(/\/cart/)`) denetler.
+  * **İşlem Devamlılığı (Retry & Recovery):** Hata durumunda kullanıcıya tekrar deneme imkanı vermek adına "Sipariş Ver" butonunun (`placeOrderButton`) ekranda görünür kalmaya devam ettiğini (`toBeVisible()`) doğrular.

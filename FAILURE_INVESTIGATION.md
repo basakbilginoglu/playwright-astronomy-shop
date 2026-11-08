@@ -20,6 +20,9 @@ Bu doküman, OpenTelemetry Astronomy Shop demo ortamında `http://localhost:8080
 ### 3. Kanıt (Evidence)
 * **Network Kanıtı (DevTools):** İstek atıldığında `/api/checkout` uç noktasının yanıt veremeyip `504 Gateway Timeout` üretmesi.
 * **Trace Kanıtı (Jaeger UI):** `checkout` servisinden `payment` servisine giden gRPC çağrısının üzerinde kırmızı hata ikonu ve `DEADLINE_EXCEEDED` / `UNAVAILABLE` statüsü (*Trace ID: `0f2f97c1fca1b6c09d9f4568b3acbbfd`*).
+* **Görsel Kanıt:**
+
+![Jaeger Failure Trace Tree](evidence/jaeger-failure-trace.png)
 * **Log Kanıtı (Docker):** `checkout` mikroservisi konsol loglarında yakalanan zaman aşımı hatası:
   ```text
   [CheckoutService] Error calling PaymentService: grpc: deadline exceeded
