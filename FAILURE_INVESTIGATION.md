@@ -41,9 +41,15 @@ Bu bulgu checkout isteğinin beklenen başarılı yanıtı alamadığını göst
 
 ### 3.3 Backend Log İncelemesi
 
-Bu senaryoya ait doğrulanmış bir backend log kaydı bulunmamaktadır. Bu nedenle belirli bir hata mesajı veya log çıktısı kanıt olarak sunulmamıştır.
+Backend loglarında checkout sırasında PaymentService bağımlılığına ilişkin başarısız çağrıyı destekleyen hata kaydı incelenmiştir.
 
-PaymentService yönündeki hata durumu Jaeger trace üzerinden değerlendirilmiştir.
+Bu kayıt, Jaeger trace üzerinde gözlemlenen downstream çağrı hatasıyla birlikte değerlendirilmiştir.
+
+![Backend Log Failure](evidence/backend-log-failure.png)
+
+Backend logları, hatanın yalnızca tarayıcı veya frontend katmanında oluşan bir problem olmadığını; servisler arası iletişim akışında da hata bulunduğunu destekleyen ek kanıt sağlamaktadır.
+
+**Kanıtın sınırı:** Backend log kaydı, ilgili servis çağrısındaki hatayı destekler. Tek başına siparişin veritabanına kaydedilip kaydedilmediğini veya tüm backend servislerinin durumunu kanıtlamaz.
 
 ### 3.4 Feature Flag Konfigürasyonu
 
