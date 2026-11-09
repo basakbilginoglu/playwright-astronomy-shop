@@ -13,9 +13,9 @@ Astronomy Shop e-ticaret platformu üzerindeki kritik uçtan uca sipariş ve öd
 Checkout akışının başarıyla tamamlandığını kabul edebilmek için sistem genelinde aşağıdaki 4 ana teknik kanıtın sağlanması gerekmektedir:
 
 * **HTTP / API Seviyesinde Başarı:** `CheckoutService` ve bağımlı mikroservislerden (`Payment`, `Shipping`, `Cart`) `HTTP 200 OK` veya `HTTP 201 Created` statü kodunun dönmesi ve API yanıtı (`payload`) içerisinde benzersiz bir `Order ID` bilgisinin üretilmesi.
-* **Bildirim Servisi Kanıtı:** Kullanıcının sistemde tanımlı e-posta adresine sipariş onay mesajının (`Order Confirmation Email`) başarıyla tetiklenip iletilmiş olması.
-* **Kullanıcı Arayüzü (UI) Kanıtı:** Checkout ekranının başarıyla kapanarak sipariş özet ekranının görünmesi; ekran üzerinde `Order ID`, kargo adresi ve sipariş edilen ürünlerin miktar/fiyat doğruluğunun teyit edilmesi.
-* **Finansal / Ödeme Kanıtı:** Ödeme servisinin (`PaymentService`) işlemi onaylaması ve kullanıcının hesabından/kartından tam ve beklenen tutarın (`Ürünler Toplamı + Kargo`) düşmüş olması.
+* **Bildirim Servisi Kanıtı:** Kullanıcının sistemde tanımlı e-posta adresine sipariş onay mesajının iletildiği bilgisinin teyit edilmesi
+* **Kullanıcı Arayüzü (UI) Kanıtı:** Ekran üzerinde `Order ID`, kargo adresi ve sipariş edilen ürünlerin miktar/fiyat doğruluğunun teyit edilmesi.
+* **Finansal / Ödeme Kanıtı:** Ödeme servisinin (`PaymentService`) işlemi onaylaması.
 
 ---
 

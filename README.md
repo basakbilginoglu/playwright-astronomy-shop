@@ -1,4 +1,4 @@
-# Astronomy Shop – QA Engineering Challenge
+# Astronomy Shop – QA Engineering 
 
 Bu proje, [OpenTelemetry Astronomy Shop](https://github.com/open-telemetry/opentelemetry-demo) demo uygulaması üzerinde gerçekleştirilen bir QA Engineering Challenge çalışmasıdır.
 
@@ -230,4 +230,5 @@ Bu doküman mevcut test kapsamı ve gözlemlenen riskler üzerinden hazırlanmı
 
 ## Proje Hedefi
 
-Bu çalışmanın temel hedefi, yalnızca test senaryoları yazmak değil; bir checkout akışını QA perspektifinden değerlendirmek, hata araştırmasını teknik kanıtlarla desteklemek ve test sonuçlarını sürdürülebilir bir kalite süreci içinde ele almaktır.
+Bu çalışmanın temel hedefi, yalnızca test senaryoları yazmak değil; bir checkout akışını QA perspektifinden değerlendirmek, hata araştırmasını teknik kanıtlarla desteklemek ve test sonuçlarını sürdürülebilir bir kalite süreci içinde ele almaktır. 
+Bu proje 9 saatlik bir sürede tamamlanmıştır.
