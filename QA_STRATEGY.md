@@ -15,7 +15,6 @@ Checkout akışının başarıyla tamamlandığını kabul edebilmek için siste
 * **HTTP / API Seviyesinde Başarı:** `CheckoutService` ve bağımlı mikroservislerden (`Payment`, `Shipping`, `Cart`) `HTTP 200 OK` veya `HTTP 201 Created` statü kodunun dönmesi ve API yanıtı (`payload`) içerisinde benzersiz bir `Order ID` bilgisinin üretilmesi.
 * **Bildirim Servisi Kanıtı:** Kullanıcının sistemde tanımlı e-posta adresine sipariş onay mesajının iletildiği bilgisinin teyit edilmesi
 * **Kullanıcı Arayüzü (UI) Kanıtı:** Ekran üzerinde `Order ID`, kargo adresi ve sipariş edilen ürünlerin miktar/fiyat doğruluğunun teyit edilmesi.
-* **Finansal / Ödeme Kanıtı:** Ödeme servisinin (`PaymentService`) işlemi onaylaması.
 
 ---
 

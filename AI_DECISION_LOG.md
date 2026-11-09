@@ -21,13 +21,13 @@ Test geliştirme ve hata ayıklama sürecinde AI desteği kullanıldı.
 ## 3. Failure Investigation
 
 Kontrollü checkout hata senaryosunun incelenmesinde AI desteği alındı.
-
+ 
 - Network, Jaeger ve backend log bulguları değerlendirildi.
 - Hata nedenleri ve hipotezler gözden geçirildi.
 
 ## 4. Observability
 
-Observability incelemesinde elde edilen bulguların değerlendirilmesi ve raporlanması için AI desteği kullanıldı.
+Observability araçlarının öğrenilmesinde ve observability incelemesinde elde edilen bulguların değerlendirilmesi ve raporlanması için AI desteği kullanıldı.
 
 - Trace ve log analizleri düzenlendi.
 - Prometheus ve Grafana incelemesindeki bulgular netleştirildi.
