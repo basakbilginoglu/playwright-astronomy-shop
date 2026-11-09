@@ -53,9 +53,16 @@ E-ticaret otomasyon testlerinde sadece "mutlu yol" (happy path) akışını test
   * **Backend Yükünü Engelleme:** Geçersiz verilerin backend servislerine (`checkout` gRPC servisi) kadar ulaşıp sunucu kaynaklarını boşa harcamasını ve veritabanında hatalı/eksik veri oluşmasını önler.
   * **Kullanıcı Deneyimi (UX):** Kullanıcının sepet sayfasında tutulduğunu ve sipariş onay ekranına (`confirmationTitle`) geçiş yapılmadığını doğrular.
 
-### 2. UI-03: HTTP 400, 500 ve 503 API Hata Mocklama (Graceful Degradation & Error Handling)
-* **Senaryo:** `order should not complete when checkout API returns [400, 500, 503]`
-* **Seçim Gerekçesi:**
-  * **Resilience (Sistem Dayanıklılığı) Kontrolü:** İstemci katmanının (Next.js BFF / Frontend) backend'den gelebilecek istemci hatalarına (`400 Bad Request`), sunucu çökmelerine (`500 Internal Server Error`) ve servis kesintilerine (`503 Service Unavailable`) nasıl tepki verdiğini doğrular.
-  * **Arayüz Uyumsuzluklarını Yakalama:** Sunucu tarafında hata oluştuğunda arayüzün yanlışlıkla "Sipariş Başarılı" ekranı gösterip göstermediğini ve kullanıcının sepet sayfasında (`/cart`) güvenli şekilde tutulup tutulmadığını (`page.toHaveURL(/\/cart/)`) denetler.
-  * **İşlem Devamlılığı (Retry & Recovery):** Hata durumunda kullanıcıya tekrar deneme imkanı vermek adına "Sipariş Ver" butonunun (`placeOrderButton`) ekranda görünür kalmaya devam ettiğini (`toBeVisible()`) doğrular.
+### 2. UI-03: HTTP 400, 500 ve 503 API Hata Mocklama (Error Handling & Resilience)
+
+- **Senaryo:** `order should not complete when checkout API returns [400, 500, 503]`
+
+- **Seçim Gerekçesi:**
+
+  - **Hata Yanıtlarının Yönetimi (Error Handling):** Checkout API'sinden dönebilecek farklı HTTP hata yanıtlarına (400 Bad Request, 500 Internal Server Error ve 503 Service Unavailable) karşı frontend'in davranışını değerlendirir. API yanıtları `page.route()` ve `route.fulfill()` kullanılarak mock edilir.
+
+  - **Arayüz Tutarlılığı (UI Consistency):** API hatası alındığında uygulamanın yanlışlıkla sipariş başarı ekranını göstermediğini ve kullanıcının sepet sayfasında (`/cart`) kaldığını (`toHaveURL(/\/cart/)`) doğrular.
+
+  - **Hata Sonrası Kullanılabilirlik (Recovery Readiness):** Hata yanıtı sonrasında "Sipariş Ver" butonunun görünür (`toBeVisible()`) ve etkin (`toBeEnabled()`) kaldığını kontrol ederek kullanıcının yeniden işlem başlatabilmesi için arayüzün kullanılabilir durumda olduğunu doğrular.
+
+- **Kapsam Sınırı:** Bu testler mock HTTP yanıtları üzerinden frontend hata yönetimini değerlendirir. Gerçek backend servislerinin dayanıklılığını, siparişin veritabanına kaydedilmediğini veya otomatik retry mekanizmasının çalıştığını kanıtlamaz.

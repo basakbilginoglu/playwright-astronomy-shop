@@ -41,13 +41,9 @@ Bu bulgu checkout isteğinin beklenen başarılı yanıtı alamadığını göst
 
 ### 3.3 Backend Log İncelemesi
 
-Checkout servisi loglarında aşağıdaki hata mesajı görülmüştür:
+Bu senaryoya ait doğrulanmış bir backend log kaydı bulunmamaktadır. Bu nedenle belirli bir hata mesajı veya log çıktısı kanıt olarak sunulmamıştır.
 
-```text
-[CheckoutService] Error calling PaymentService: grpc: deadline exceeded
-```
-
-Bu mesaj, CheckoutService'in PaymentService çağrısının zaman aşımına uğradığını göstermektedir.
+PaymentService yönündeki hata durumu Jaeger trace üzerinden değerlendirilmiştir.
 
 ### 3.4 Feature Flag Konfigürasyonu
 
