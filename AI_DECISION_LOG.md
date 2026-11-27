@@ -45,3 +45,15 @@ Projenin temel geliştirme ve test çalışmaları öncelikle AI desteği olmada
 AI, teknik öneriler, hata analizi, kod incelemesi ve dokümantasyon düzenlemelerinde yardımcı araç olarak kullanıldı.
 
 Öneriler proje kodu ve test sonuçları dikkate alınarak değerlendirildi. Nihai teknik kararlar ve doğrulamalar proje çalışmaları üzerinden gerçekleştirildi.
+## T05 Performance & Service Reliability
+
+Bu çalışma sırasında AI; k6 testlerinin kurulumu ve hata ayıklama,
+threshold'ların anlaşılması, test sonuçlarının yorumlanması ve
+dokümantasyonun düzenlenmesi için kullanıldı.
+
+Testler proje ortamında çalıştırıldı. k6 sonuçları, Jaeger trace'leri
+ve Docker kaynak kullanımı çıktıları incelendi. Teknik değerlendirmeler
+mevcut test sonuçlarına göre yapıldı.
+
+AI tarafından önerilen kod ve açıklamalar kontrol edilerek projeye
+uygulandı. Test sonuçları ve kanıtlar gerçek çalıştırmalardan alındı.
