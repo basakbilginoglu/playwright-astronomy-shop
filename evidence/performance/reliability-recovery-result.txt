@@ -1,0 +1,32 @@
+█ TOTAL RESULTS 
+
+    checks_total.......: 6       1.442726/s
+    checks_succeeded...: 100.00% 6 out of 6
+    checks_failed......: 0.00%   0 out of 6
+
+    ✓ Sepet başarıyla oluşturuldu
+    ✓ Sipariş başarıyla tamamlandı
+
+    CUSTOM
+    checkout_duration..............: avg=1359.831778 min=506.372375 med=853.167333 max=2719.955626 p(90)=2346.597967 p(95)=2533.276797
+
+    HTTP
+    http_req_duration..............: avg=692.5ms     min=5.11ms     med=277.23ms   max=2.71s       p(90)=1.78s       p(95)=2.25s      
+      { expected_response:true }...: avg=692.5ms     min=5.11ms     med=277.23ms   max=2.71s       p(90)=1.78s       p(95)=2.25s      
+    http_req_failed................: 0.00%  0 out of 6
+    http_reqs......................: 6      1.442726/s
+
+    EXECUTION
+    iteration_duration.............: avg=1.38s       min=529.11ms   med=858.51ms   max=2.77s       p(90)=2.38s       p(95)=2.57s      
+    iterations.....................: 3      0.721363/s
+    vus............................: 1      min=1      max=1
+    vus_max........................: 1      min=1      max=1
+
+    NETWORK
+    data_received..................: 4.3 kB 1.0 kB/s
+    data_sent......................: 2.2 kB 535 B/s
+
+
+
+
+running (00m04.2s), 0/1 VUs, 3 complete and 0 interrupted iterations

@@ -1,10 +1,23 @@
-name: Playwright Tests
+
+name: Playwright and Performance Tests
 
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      performance_test:
+        description: 'Çalıştırılacak k6 testi'
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+          - baseline
+          - load
+          - spike
 
 env:
   CI: true
@@ -16,11 +29,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Playwright test projesi
       - name: Checkout Playwright project
         uses: actions/checkout@v4
 
-      # Test edilen uygulamanın sabitlenmiş sürümü
       - name: Checkout OpenTelemetry Demo
         uses: actions/checkout@v4
         with:
@@ -43,7 +54,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # Astronomy Shop uygulamasını ve gerekli bağımlılıklarını başlat
       - name: Start Astronomy Shop
         run: |
           docker compose \
@@ -65,7 +75,58 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
-      # Hata durumunda Docker servislerinin loglarını sakla
+      # PR ve push işlemlerinde kısa smoke testi
+      - name: Run k6 smoke test
+        if: github.event_name != 'workflow_dispatch' || inputs.performance_test == 'smoke'
+        run: |
+          mkdir -p evidence/ci
+          set -o pipefail
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE:/scripts" \
+            -w /scripts \
+            -e BASE_URL=http://localhost:8080 \
+            grafana/k6 run performance/checkout-smoke.js \
+            | tee evidence/ci/checkout-smoke-results.txt
+
+      # Manuel baseline testi
+      - name: Run k6 baseline test
+        if: github.event_name == 'workflow_dispatch' && inputs.performance_test == 'baseline'
+        run: |
+          mkdir -p evidence/ci
+          set -o pipefail
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE:/scripts" \
+            -w /scripts \
+            -e BASE_URL=http://localhost:8080 \
+            grafana/k6 run performance/checkout-baseline.js \
+            | tee evidence/ci/checkout-baseline-results.txt
+
+      # Manuel staged load testi
+      - name: Run k6 load test
+        if: github.event_name == 'workflow_dispatch' && inputs.performance_test == 'load'
+        run: |
+          mkdir -p evidence/ci
+          set -o pipefail
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE:/scripts" \
+            -w /scripts \
+            -e BASE_URL=http://localhost:8080 \
+            grafana/k6 run performance/checkout-load.js \
+            | tee evidence/ci/checkout-load-results.txt
+
+      # Manuel spike testi
+      - name: Run k6 spike test
+        if: github.event_name == 'workflow_dispatch' && inputs.performance_test == 'spike'
+        run: |
+          mkdir -p evidence/ci
+          set -o pipefail
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE:/scripts" \
+            -w /scripts \
+            -e BASE_URL=http://localhost:8080 \
+            grafana/k6 run performance/checkout-spike.js \
+            | tee evidence/ci/checkout-spike-results.txt
+
       - name: Collect Docker logs
         if: failure()
         run: |
@@ -85,7 +146,6 @@ jobs:
             -f docker/compose.ci.yaml \
             logs --no-color --tail=100 || true
 
-      # HTML raporu ve hata kanıtları
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,7 +157,15 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-      # CI bitince servisleri kapat
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-performance-results
+          path: evidence/ci/
+          retention-days: 30
+          if-no-files-found: ignore
+
       - name: Stop Astronomy Shop
         if: always()
         run: |
